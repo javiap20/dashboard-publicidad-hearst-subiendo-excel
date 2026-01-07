@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIGITAL - Facturación Display</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --card:#111827;
+  --text:#e5e7eb;
+  --base:#38bdf8;          /* azul */
+  --comp:#f59e0b;          /* amarillo */
+  --neg:#f87171;           /* rojo */
+  --diffColor:#6ee7b7;     /* verde claro */
+  --ok-green: #34d399;
+  --totalBg:#1e40af;       /* azul oscuro */
+  --siteBg:#fef3c7; 
+  --productoBg:#dbeafe; 
+  --sectorBg:#fbcfe8; 
+  --comercialBg:#d1fae5; 
+  --areaBg:#fcd5ce;
+  --print-color: #db2777;  /* Rosa para PRINT */
+  --base-color: #38bdf8;   /* Variable para el menú */
+}
+
+body{
+  margin:0;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif; /* Tipografía del original */
+  background:linear-gradient(180deg,#020617,#0f172a);
+  color:var(--text);
+}
+
+/* --- ESTILOS MENU SUPERIOR (REPLICADOS) --- */
+.nav-menu {
+    background: #111827;
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #374151;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.nav-menu a { color: white; margin: 0 10px; text-decoration: none; font-size: 0.9em; opacity: 0.6; }
+.nav-menu .active { opacity: 1; font-weight: bold; border-bottom: 2px solid var(--base-color); padding-bottom: 5px; }
+/* ------------------------------------------ */
+
+/* TAMAÑO DE TÍTULO REPLICADO */
+h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 20px 0;
+}
+
+.container{ max-width:1500px; margin:auto; padding:20px; }
+
+.card{
+  background:rgba(17,24,39,.9);
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:20px;
+  border: 1px solid #1f2937;
+}
+
+.label-style { font-size: 0.95em; font-weight: bold; margin-bottom: 8px; display: block; }
+
+.filters select, input[type=file]{
+  background:#1f2933; 
+  color:var(--text); 
+  border:1px solid #374151;
+  padding:8px 10px; 
+  border-radius:8px; 
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#loadStatus { 
+  margin-top: 10px; 
+  font-weight: 600; 
+  font-size: 0.85em; 
+}
+
+.filters label{ font-weight:600; margin-right:6px; display:block; margin-top:10px; }
+.filtersRow{ display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
+.filtersRow div select{ width:220px; font-weight:600; }
+
+#fSite{ background:var(--siteBg); color:#111; }
+#fProduct{ background:var(--productoBg); color:#111; }
+#fSector{ background:var(--sectorBg); color:#111; }
+#fComercial{ background:var(--comercialBg); color:#111; }
+#fArea{ background:var(--areaBg); color:#111; }
+
+.checkboxGroup{ display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+.checkboxGroup label{ font-size: 0.85em; font-weight:400; color: #cbd5e1; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+
+.totalBlock{ background:var(--totalBg); padding:15px; border-radius:12px; margin-top:10px; }
+.totalValues{ display:flex; justify-content:space-around; font-size:18px; }
+.totalValues div{ text-align:center; }
+.totalValues .value{ font-size:22px; font-weight:700; display: block; margin-top: 5px; }
+#diffPercent.negative { color: var(--neg); }
+
+.statsBlock{ display:flex; justify-content:center; border-radius:12px; margin:20px 0; gap:10px; flex-wrap:nowrap; }
+.subBlock{ border-radius:12px; padding:20px; display:flex; align-items:center; justify-content:center; color: #111; }
+.statsBase{ flex:1; background:var(--comp); }
+.statsDiff{ flex:0 0 300px; background:var(--diffColor); text-align: center; }
+.statsComp{ flex:1; background:var(--base); }
+
+.statsValues{ display:flex; justify-content:center; font-size:15px; gap:20px; flex-wrap:wrap; }
+.statsValues div{ text-align:center; }
+.statsValues .value{ font-size:18px; font-weight:700; display: block; margin-top: 5px; }
+.statsDiff .value.negative{ color:var(--neg); }
+
+.labelBase{ color:#f59e0b; font-weight:700; }
+.labelComp{ color:#38bdf8; font-weight:700; }
+
+#chartProductsBars{ width:100%; min-height: 400px; }
+.notice{ padding:14px; background:#1f2937; border-radius:10px; color:#cbd5e1; margin-top:10px; border: 1px dashed #4b5563; }
+</style>
+</head>
+<body>
+
+<nav class="nav-menu">
+    <a href="digital-datos-graficos.html" style="color: var(--base-color); font-weight: bold; margin-right: 10px; opacity: 1;">DIGITAL:</a>
+    <a href="digital-datos-graficos.html">Datos</a>
+    <a href="digital-facturacion-desglosada.html">Desglose</a>
+    <a href="digital-facturacion-por-anunciante.html">Anunciantes</a>
+    <a href="digital-totales-familas-productos.html">Productos</a>
+    <a href="digital-display.html" class="active">Display</a>
+    <a href="digital-redes-sociales.html">RRSS</a>
+
+    <a href="print-datos-graficos.html" style="color: var(--print-color); font-weight: bold; margin-left: 20px; margin-right: 10px; border-left: 1px solid #4b5563; padding-left: 20px; opacity: 1;">PRINT:</a>
+    <a href="print-datos-graficos.html">Datos</a>
+    <a href="print-facturacion-desglosada.html">Desglose</a>
+    <a href="print-facturacion-por-anunciante.html">Anunciantes</a>
+    
+    <a href="index.html" style="margin-left: 20px; border-left: 1px solid #4b5563; padding-left: 20px;">🏠 Home</a>
+</nav>
+
+<h1>DIGITAL - Facturación Display</h1>
+
+<div class="container">
+    <div class="card">
+        <label class="label-style">Cargar datos (Excel):</label>
+        <input type="file" id="fileInput" accept=".xlsx">
+        <div id="loadStatus">Esperando archivo...</div>
+    </div>
+
+  <div id="siteBlock" class="card filters" style="display:none">
+    <div class="filtersRow">
+      <div><label>Site</label><select id="fSite"></select></div>
+      <div><label>Familia Display</label><select id="fProduct"></select></div>
+      <div><label>Sector</label><select id="fSector"></select></div>
+      <div><label>Comercial</label><select id="fComercial"></select></div>
+      <div><label>Área</label><select id="fArea"></select></div>
+    </div>
+  </div>
+
+  <div id="filters" class="card filters" style="display:none">
+    <div class="filtersRow">
+      <div><label class="labelBase">Año base</label><select id="fYear"></select><div class="checkboxGroup" id="monthsBase"></div></div>
+      <div><label class="labelComp">Año comparación</label><select id="fYear2"></select><div class="checkboxGroup" id="monthsComp"></div></div>
+    </div>
+  </div>
+
+  <div id="totalBlock" class="card" style="display:none">
+    <div class="totalBlock">
+      <div class="totalValues">
+        <div>Año base<span id="totalYear1" class="value">0€</span></div>
+        <div>Año comparación<span id="totalYear2" class="value">-</span></div>
+        <div>% Diferencia<span id="diffPercent" class="value">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="statsBlock" class="statsBlock" style="display:none">
+      <div class="subBlock statsBase">
+        <div class="statsValues">
+          <div>Fact. Año Base<span id="totalStatsBase" class="value">0€</span></div>
+          <div>Nº líneas<span id="linesStatsBase" class="value">0</span></div>
+          <div>Presup. medio<span id="avgStatsBase" class="value">0€</span></div>
+        </div>
+      </div>
+      <div class="subBlock statsDiff">
+        <div class="statsValues">
+          <div>% Crec. Presup. Medio<span id="diffAvgStats" class="value" style="font-size: 1.8em; display:block; margin-top: 5px;">-</span></div>
+        </div>
+      </div>
+      <div class="subBlock statsComp">
+        <div class="statsValues">
+          <div>Fact. Año Comparación<span id="totalStatsComp" class="value">-</span></div>
+          <div>Nº líneas<span id="linesStatsComp" class="value">-</span></div>
+          <div>Presup. medio<span id="avgStatsComp" class="value">-</span></div>
+        </div>
+      </div>
+  </div>
+
+  <div id="chartCardBars" class="card" style="display:none">
+    <h2>Ingresos por Producto</h2>
+    <div id="chartProductsBars"></div>
+    <div id="msgTodos" class="notice" style="display:none">Elige una <b>Familia Display</b> para ver sus productos.</div>
+  </div>
+</div>
+
+<script>
+// EL RESTO DEL SCRIPT SE MANTIENE INTACTO PARA GARANTIZAR EL FUNCIONAMIENTO
+const MONTHS=["01 Enero","02 Febrero","03 Marzo","04 Abril","05 Mayo","06 Junio","07 Julio","08 Agosto","09 Septiembre","10 Octubre","11 Noviembre","12 Diciembre"];
+const FAMILIAS_DISPLAY = ["Display", "Programatica Display Directo", "Programatica Display Indirecto", "Video", "Video Programatico Directo", "Video Programatico Indirecto"];
+let rawData=[];
+
+function toTitleCase(str) {
+    if(!str) return "";
+    return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+function cleanSector(str) {
+    if(!str) return "";
+    let s = str.replace(/^[0-9* ]+/, "");
+    return toTitleCase(s);
+}
+
+fileInput.onchange = e => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+        const ext = f.name.split(".").pop().toLowerCase();
+        if (ext === "json") {
+            init(JSON.parse(ev.target.result));
+        } else {
+            const data = new Uint8Array(ev.target.result);
+            const wb = XLSX.read(data, {type:"array"});
+            init(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" }));
+        }
+        const status = document.getElementById("loadStatus");
+        status.innerText = "✅ Archivo cargado";
+        status.style.color = "var(--ok-green)";
+    } catch(err) {
+        document.getElementById("loadStatus").innerText = "❌ Error: " + err.message;
+        document.getElementById("loadStatus").style.color = "var(--neg)";
+    }
+  };
+  f.name.endsWith("json") ? r.readAsText(f) : r.readAsArrayBuffer(f);
+};
+
+function num(v){
+  if(v==null) return 0;
+  if(typeof v === 'number') return v;
+  const s = String(v).replace(/\u00A0/g," ").replace(/€/g,"").replace(/\s/g,"").replace(/\./g,"").replace(/,/g,".");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
+
+const currencyFormatter = new Intl.NumberFormat('es-ES', { useGrouping: true, minimumFractionDigits: 0, maximumFractionDigits: 0 });
+function formatCurrency(n){ return currencyFormatter.format(Math.round(n || 0)) + '€'; }
+const integerFormatter = new Intl.NumberFormat('es-ES', { useGrouping: true, maximumFractionDigits: 0 });
+function formatInteger(n){ return integerFormatter.format(n || 0); }
+
+function init(data){
+  rawData = data.map(d => ({
+    ingreso:  num(d["Imp.Neto a Comisionar"]),
+    Año:      String(d["Año inserción"] || "").trim(),
+    Mes:      MONTHS.find(m => m.startsWith(String(d["Mes inserción"]).trim().substring(0,2))) || "",
+    Site:      String(d["Publicación"] || "").trim().toLowerCase(),
+    Familia:  toTitleCase(String(d["Familia"] || "").trim()),
+    Producto: String(d["Producto"] || "").trim().toUpperCase(),
+    Sector:   cleanSector(String(d["Sector"] || "")),
+    Comercial:toTitleCase(String(d["Comercial"] || "").trim()),
+    Area:     toTitleCase(String(d["ÁREAS"] || "").trim())
+  })).filter(d => d.Año !== "");
+
+  const populate = (id, arr) => {
+    document.getElementById(id).innerHTML = "<option>Todos</option>" + [...new Set(arr.filter(Boolean))].sort().map(v=>`<option>${v}</option>`).join("");
+  };
+
+  populate("fSite", rawData.map(d=>d.Site));
+  populate("fProduct", FAMILIAS_DISPLAY.map(f => toTitleCase(f)));
+  populate("fSector", rawData.map(d=>d.Sector));
+  populate("fComercial", rawData.map(d=>d.Comercial));
+  populate("fArea", rawData.map(d=>d.Area));
+  
+  const years = [...new Set(rawData.map(d=>d.Año))].sort().reverse();
+  fYear.innerHTML  = "<option>Todos</option>" + years.map(y=>`<option>${y}</option>`).join("");
+  fYear2.innerHTML = "<option>Sin comparar</option>" + years.map(y=>`<option>${y}</option>`).join("");
+
+  document.getElementById("monthsBase").innerHTML = MONTHS.map(m=>`<label><input type="checkbox" value="${m}" onchange="render()"> ${m.slice(3)}</label>`).join("");
+  document.getElementById("monthsComp").innerHTML = MONTHS.map(m=>`<label><input type="checkbox" value="${m}" onchange="render()"> ${m.slice(3)}</label>`).join("");
+
+  [fSite,fProduct,fSector,fYear,fYear2,fComercial,fArea].forEach(e=>e.onchange=render);
+  ["siteBlock","filters","totalBlock","statsBlock","chartCardBars"].forEach(id=>document.getElementById(id).style.display="block");
+  document.getElementById("statsBlock").style.display="flex";
+  render();
+}
+
+function calcWithNetting(data) {
+    const famPermitidas = FAMILIAS_DISPLAY.map(f => f.toUpperCase());
+    const filtered = data.filter(d => famPermitidas.includes(d.Familia.toUpperCase()));
+    const total = filtered.reduce((a, b) => a + b.ingreso, 0);
+    let pool = filtered.filter(d => d.ingreso !== 0).map(d => d.ingreso);
+    let lines = 0;
+    pool.sort((a, b) => Math.abs(a) - Math.abs(b));
+    while (pool.length > 0) {
+        let current = pool.shift();
+        let idx = pool.findIndex(v => v === -current);
+        if (idx !== -1) pool.splice(idx, 1);
+        else if (current > 0) lines++;
+    }
+    return { total, lines, avg: lines ? total / lines : 0 };
+}
+
+function render(){
+  const site = fSite.value.toLowerCase(),
+        prod = fProduct.value.toLowerCase(),
+        sect = fSector.value.toLowerCase(),
+        y1   = fYear.value,
+        y2   = fYear2.value,
+        com  = fComercial.value.toLowerCase(),
+        area = fArea.value.toLowerCase();
+
+  const mBase = Array.from(document.getElementById("monthsBase").querySelectorAll("input:checked")).map(i=>i.value);
+  const mComp = Array.from(document.getElementById("monthsComp").querySelectorAll("input:checked")).map(i=>i.value);
+
+  const filterData = (y, selectedMonths) => rawData.filter(d => 
+     (y==="Todos" || d.Año===y) &&
+     (selectedMonths.length === 0 || selectedMonths.includes(d.Mes)) &&
+     (site==="todos" || d.Site===site) &&
+     (prod==="todos" || d.Familia.toLowerCase()===prod) &&
+     (sect==="todos" || d.Sector.toLowerCase()===sect) &&
+     (com==="todos" || d.Comercial.toLowerCase()===com) &&
+     (area==="todos" || d.Area.toLowerCase()===area)
+  );
+
+  const d1 = filterData(y1, mBase);
+  const d2 = (y2!=="Sin comparar") ? filterData(y2, mComp) : [];
+
+  const s1 = calcWithNetting(d1);
+  const s2 = calcWithNetting(d2);
+
+  totalYear1.textContent = formatCurrency(s1.total);
+  totalStatsBase.textContent = formatCurrency(s1.total);
+  linesStatsBase.textContent = formatInteger(s1.lines);
+  avgStatsBase.textContent = formatCurrency(s1.avg);
+
+  if(y2!=="Sin comparar"){
+    totalYear2.textContent = formatCurrency(s2.total);
+    totalStatsComp.textContent = formatCurrency(s2.total);
+    linesStatsComp.textContent = formatInteger(s2.lines);
+    avgStatsComp.textContent = formatCurrency(s2.avg);
+    const dPct = s2.total ? Math.round((s1.total/s2.total - 1)*100) : 0;
+    diffPercent.textContent = (dPct > 0 ? "+" : "") + dPct + "%";
+    diffPercent.className = "value" + (dPct < 0 ? " negative" : "");
+    const aPct = s2.avg ? Math.round((s1.avg/s2.avg - 1)*100) : 0;
+    diffAvgStats.textContent = (aPct > 0 ? "+" : "") + aPct + "%";
+    diffAvgStats.style.color = aPct < 0 ? "var(--neg)" : "#111";
+  } else {
+    totalYear2.textContent = "-"; totalStatsComp.textContent = "-"; linesStatsComp.textContent = "-";
+    avgStatsComp.textContent = "-"; diffPercent.textContent = "-"; diffAvgStats.textContent = "-";
+  }
+
+  const div = document.getElementById("chartProductsBars");
+  if(fProduct.value === "Todos") {
+    document.getElementById("msgTodos").style.display = "block";
+    Plotly.purge(div);
+  } else {
+    document.getElementById("msgTodos").style.display = "none";
+    const m1 = {}, m2 = {};
+    d1.forEach(d => m1[d.Producto] = (m1[d.Producto]||0) + d.ingreso);
+    d2.forEach(d => m2[d.Producto] = (m2[d.Producto]||0) + d.ingreso);
+
+    const labels = [...new Set([...Object.keys(m1), ...Object.keys(m2)])].sort((a,b) => (m1[b]||0) - (m1[a]||0));
+
+    const traces = [{
+      y: labels, x: labels.map(l => m1[l]||0), name: y1,
+      type: 'bar', orientation: 'h', marker: {color: "#38bdf8"},
+      text: labels.map(l => {
+        if(y2==="Sin comparar" || !(m2[l]>0)) return "";
+        const p = Math.round(((m1[l]||0)/(m2[l]||0)-1)*100);
+        return ` ${p>0?'+':''}${p}%`;
+      }), textposition: 'outside', cliponaxis: false
+    }];
+
+    if(y2!=="Sin comparar") {
+      traces.push({
+        y: labels, x: labels.map(l => m2[l]||0), name: y2,
+        type: 'bar', orientation: 'h', marker: {color: "#f59e0b"}
+      });
+    }
+
+    div.style.height = Math.max(400, (150 + labels.length * 45)) + "px";
+    Plotly.newPlot(div, traces, {
+      paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"rgba(0,0,0,0)", font:{color:"#eee"},
+      margin:{l:280, r:100, t:20, b:50}, barmode: 'group',
+      xaxis: { gridcolor: '#1f2937', tickformat: ',.0f', ticksuffix: '€' },
+      yaxis: { automargin: true, autorange: "reversed" }
+    }, {responsive: true});
+  }
+}
+</script>
+</body>
+</html>
