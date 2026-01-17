@@ -233,6 +233,21 @@ itemList li::before{
     <div id="loadStatus">Esperando archivo...</div>
   </div>
 
+<div id="filters" class="card filters" style="display:none">
+    <div class="filtersRow">
+      <div>
+        <label class="labelBase" style="color:var(--comp);">Año base</label>
+        <select id="fYear"></select>
+        <div class="checkboxGroup" id="monthsBase"></div>
+      </div>
+      <div>
+        <label class="labelComp" style="color:var(--base);">Año comparación</label>
+        <select id="fYear2"></select>
+        <div class="checkboxGroup" id="monthsComp"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="advBlock" class="card filters" style="display:none">
     <div class="filtersRow">
       <div><label>Anunciante (Por Volumen)</label><select id="fAnunciante"></select></div>
@@ -249,20 +264,7 @@ itemList li::before{
     </div>
   </div>
 
-  <div id="filters" class="card filters" style="display:none">
-    <div class="filtersRow">
-      <div>
-        <label class="labelBase" style="color:var(--comp);">Año base</label>
-        <select id="fYear"></select>
-        <div class="checkboxGroup" id="monthsBase"></div>
-      </div>
-      <div>
-        <label class="labelComp" style="color:var(--base);">Año comparación</label>
-        <select id="fYear2"></select>
-        <div class="checkboxGroup" id="monthsComp"></div>
-      </div>
-    </div>
-  </div>
+  
 
   <div id="totalBlock" class="card" style="display:none">
     <div class="totalBlock">

@@ -241,6 +241,8 @@ gap: 20px;
 
 <div class="container">
 
+
+
   <div class="card">
     <label class="upload-label">Cargar datos (Excel):</label>
     <div class="file-input-wrapper">
@@ -248,17 +250,8 @@ gap: 20px;
     </div>
     <div id="loadStatus">Esperando archivo...</div>
   </div>
-  <div id="siteBlock" class="card filters" style="display:none">
-    <div class="filtersRow">
-      <div><label>Revista</label><select id="fSite"></select></div>
-      <div><label>Producto</label><select id="fProduct"></select></div>
-      <div><label>Sector</label><select id="fSector"></select></div>
-      <div><label>Comercial</label><select id="fComercial"></select></div>
-      <div><label>Área</label><select id="fArea"></select></div>
-    </div>
-  </div>
 
-  <div id="filters" class="card filters" style="display:none">
+<div id="filters" class="card filters" style="display:none">
     <div class="filtersRow">
       <div>
         <label class="labelBase">Año base</label>
@@ -271,7 +264,19 @@ gap: 20px;
         <div class="checkboxGroup" id="monthsComp"></div>
       </div>
     </div>
+  </div> 
+
+  <div id="siteBlock" class="card filters" style="display:none">
+    <div class="filtersRow">
+      <div><label>Revista</label><select id="fSite"></select></div>
+      <div><label>Producto</label><select id="fProduct"></select></div>
+      <div><label>Sector</label><select id="fSector"></select></div>
+      <div><label>Comercial</label><select id="fComercial"></select></div>
+      <div><label>Área</label><select id="fArea"></select></div>
+    </div>
   </div>
+
+ 
 
   <div id="totalBlock" class="card filters" style="display:none">
     <div class="totalBlock">

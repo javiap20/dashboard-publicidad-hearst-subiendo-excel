@@ -151,9 +151,26 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
 <div class="container">
   <div class="card">
     <label class="label-style">Cargar datos (Excel):</label>
-    <input type="file" id="fileInput" accept=".json,.xlsx">
+    <div class="file-input-wrapper">
+    	<input type="file" id="fileInput" accept=".json,.xlsx">
+    </div>
     <div id="loadStatus">Esperando archivo...</div>
   </div>
+
+      <div class="card filters">
+        <div class="filtersRow">
+          <div>
+            <label style="color:var(--comp);">Año base</label>
+            <select id="fYear"></select>
+            <div class="checkboxGroup" id="monthsBase"></div>
+          </div>
+          <div>
+            <label style="color:var(--base);">Año comparación</label>
+            <select id="fYear2"></select>
+            <div class="checkboxGroup" id="monthsComp"></div>
+          </div>
+        </div>
+      </div>
 
   <div id="mainUI" style="display:none">
       <div class="advertiser-row">
@@ -171,20 +188,7 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
         </div>
       </div>
 
-      <div class="card filters">
-        <div class="filtersRow">
-          <div>
-            <label style="color:var(--comp);">Año base</label>
-            <select id="fYear"></select>
-            <div class="checkboxGroup" id="monthsBase"></div>
-          </div>
-          <div>
-            <label style="color:var(--base);">Año comparación</label>
-            <select id="fYear2"></select>
-            <div class="checkboxGroup" id="monthsComp"></div>
-          </div>
-        </div>
-      </div>
+
 
       <div class="totalBlock card">
         <div class="totalValues">

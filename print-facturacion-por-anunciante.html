@@ -251,6 +251,23 @@ h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
     </div>
     <div id="loadStatus">Esperando archivo...</div>
   </div>
+
+  <div id="filters" class="card filters" style="display:none">
+    <div class="filtersRow">
+      <div>
+        <label style="color:var(--comp);font-weight:800;">Año base</label>
+        <select id="fYear"></select>
+        <div class="checkboxGroup" id="monthsBase"></div>
+      </div>
+      <div>
+        <label style="color:var(--base);font-weight:800;">Año comparación</label>
+        <select id="fYear2"></select>
+        <div class="checkboxGroup" id="monthsComp"></div>
+      </div>
+    </div>
+  </div>
+
+
   <div id="advBlock" class="card filters" style="display:none">
     <div class="filtersRow">
       <div><label>Anunciante (Por Facturación Total)</label><select id="fAnunciante"></select></div>
@@ -267,20 +284,7 @@ h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
     </div>
   </div>
 
-  <div id="filters" class="card filters" style="display:none">
-    <div class="filtersRow">
-      <div>
-        <label style="color:var(--comp);font-weight:800;">Año base</label>
-        <select id="fYear"></select>
-        <div class="checkboxGroup" id="monthsBase"></div>
-      </div>
-      <div>
-        <label style="color:var(--base);font-weight:800;">Año comparación</label>
-        <select id="fYear2"></select>
-        <div class="checkboxGroup" id="monthsComp"></div>
-      </div>
-    </div>
-  </div>
+
 
   <div id="totalBlock" class="card filters" style="display:none">
     <div class="totalBlock">
