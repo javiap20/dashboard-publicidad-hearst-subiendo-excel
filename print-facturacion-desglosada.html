@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PRINT - Facturación Publicidad</title>
+<title>PRINT - Evolución de los Ingresos</title>
 
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -13,10 +12,17 @@
 :root{
   --card:#111827;
   --text:#e5e7eb;
-  --base:#38bdf8;  /* azul */
-  --comp:#f59e0b;  /* amarillo */
-  --neg:#f87171;   /* rojo */
-  --diffColor:#6ee7b7; /* verde claro */
+  
+  /* === CONFIGURACIÓN DE COLORES (TOCA AQUÍ) === */
+  --nav-digital: #38bdf8;   /* El azul fijo para la palabra DIGITAL */
+  --fucsia: #db2777;        /* El color fijo para PRINT */
+  
+  --color-anio-base: #38bdf8; /* Color para las barras de Año Base (Azul) */
+  --color-anio-comp: #f59e0b; /* Color para las barras de Año Comparado (Naranja) */
+  /* =========================================== */
+
+  --neg:#f87171;   
+  --diffColor:#6ee7b7; 
   --ok-green: #34d399; 
   --totalBg:#1e40af;
 
@@ -25,9 +31,8 @@
   --sectorBg:#fbcfe8;
   --comercialBg:#d1fae5; 
   --areaBg:#fcd5ce; 
-  --base-color: #38bdf8;
-  --fucsia: #db2777;   /* Nueva variable para PRINT */
 }
+
 body {
   margin: 0;
   font-family: 'Inter', Arial, sans-serif;
@@ -57,8 +62,8 @@ body {
   font-size: .9em;
   opacity: 0.8;
 }
-.nav-menu a:hover { opacity: 1; color: var(--base); }
-.nav-menu .active { font-weight: bold; border-bottom: 2px solid var(--base); opacity: 1; padding-bottom: 5px; }
+.nav-menu a:hover { opacity: 1; color: var(--color-anio-base); }
+.nav-menu .active { font-weight: bold; border-bottom: 2px solid var(--color-anio-base); opacity: 1; padding-bottom: 5px; }
 
 h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
 
@@ -168,9 +173,9 @@ h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
   justify-content:center;
   color:#111;
 }
-.statsBase{ flex:0 0 450px; background:var(--comp); }
+.statsBase{ flex:0 0 450px; background:var(--color-anio-base); } /* Año Base */
 .statsDiff{ flex:0 0 300px; background:var(--diffColor); text-align:center; }
-.statsComp{ flex:0 0 450px; background:var(--base); }
+.statsComp{ flex:0 0 450px; background:var(--color-anio-comp); } /* Año Comp */
 
 .statsValues{
   display:flex;
@@ -184,8 +189,8 @@ h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
 .statsDiff .value.negative{ color:var(--neg); }
 .statsDiff div:first-child{ font-weight:700; }
 
-.labelBase{ color:#f59e0b; font-weight:700; }
-.labelComp{ color:#38bdf8; font-weight:700; }
+.labelBase{ color: var(--color-anio-base); font-weight:700; }
+.labelComp{ color: var(--color-anio-comp); font-weight:700; }
 
 .grid{
 display: grid;
@@ -211,7 +216,7 @@ gap: 20px;
     font-size: 0.85rem;
     margin: 0 0 10px 0;
     text-align: center;
-    color: var(--base);
+    color: var(--color-anio-base);
     font-weight: normal;
 }
 .mini-chart { height: 220px; }
@@ -221,7 +226,7 @@ gap: 20px;
 <body>
 
 <nav class="nav-menu">
-    <span style="color: var(--base-color); font-weight: bold; margin-right: 10px; opacity: 1;">DIGITAL:</span>
+    <span style="color: var(--nav-digital); font-weight: bold; margin-right: 10px; opacity: 1;">DIGITAL:</span>
     <a href="digital-datos-graficos.html">Datos</a>
     <a href="digital-facturacion-desglosada.html">Desglose</a>
     <a href="digital-facturacion-por-anunciante.html">Anunciantes</a>
@@ -237,11 +242,9 @@ gap: 20px;
     <a href="index.html" style="margin-left: 20px; border-left: 1px solid #4b5563; padding-left: 20px;">🏠 Home</a>
 </nav>
 
-<h1>PRINT - Facturación Publicidad</h1>
+<h1>PRINT - Evolución de los Ingresos</h1>
 
 <div class="container">
-
-
 
   <div class="card">
     <label class="upload-label">Cargar datos (Excel):</label>
@@ -275,8 +278,6 @@ gap: 20px;
       <div><label>Área</label><select id="fArea"></select></div>
     </div>
   </div>
-
- 
 
   <div id="totalBlock" class="card filters" style="display:none">
     <div class="totalBlock">
@@ -323,13 +324,8 @@ gap: 20px;
 
 </div>
 
-<!-- ======= BLOQUE AÑADIDO: Auto-carga del Excel (PRODUCCION PRINT.xlsx) ======= -->
 <script>
-// Opción A: Excel en la misma carpeta que este HTML
 const excelUrl = "PRODUCCION%20PRINT.xlsx";
-
-// Opción B: Excel en GitHub Raw (descomenta y pega tu URL cruda si lo prefieres)
-// const excelUrl = "https://raw.githubusercontent.com/USUARIO/REPO/BRANCH/ruta/PRODUCCION%20PRINT.xlsx";
 
 window.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("loadStatus");
@@ -344,14 +340,11 @@ window.addEventListener("DOMContentLoaded", () => {
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
-      // Reutilizamos tu flujo original:
       init(json);
       if (statusEl) {
         statusEl.innerText = "✅ Archivo cargado automáticamente";
         statusEl.style.color = "var(--ok-green)";
       }
-      // (Opcional) Desactivar input manual:
-      // const fi = document.getElementById("fileInput"); if (fi) fi.disabled = true;
     })
     .catch(err => {
       console.error("Auto-carga fallida:", err);
@@ -362,7 +355,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-<!-- ======= FIN BLOQUE AÑADIDO ======= -->
 
 <script>
 const MONTHS=["01 Enero","02 Febrero","03 Marzo","04 Abril","05 Mayo","06 Junio","07 Julio","08 Agosto","09 Septiembre","10 Octubre","11 Noviembre","12 Diciembre"];
@@ -520,6 +512,11 @@ function render(){
   const d1=filter(y1, m1), d2=fYear2.value!=="Sin comparar" ? filter(y2, m2) : [];
   const s1=calcNetting(d1), s2=calcNetting(d2);
 
+  // EXTRAEMOS LOS COLORES DEL CSS DINÁMICAMENTE
+  const style = getComputedStyle(document.documentElement);
+  const colorB = style.getPropertyValue('--color-anio-base').trim();
+  const colorC = style.getPropertyValue('--color-anio-comp').trim();
+
   totalYear1.textContent   = formatCurrency(s1.total);
   totalStatsBase.textContent= formatCurrency(s1.total);
   linesStatsBase.textContent= formatInteger(s1.lines);
@@ -556,17 +553,15 @@ function render(){
 
   const traces = (type, extra={}) => {
     let t = [];
-    t.push({ x:MONTHS.map(m=>m.slice(3)), y:v1, name:fYear.value, type, marker:{color:"#38bdf8"}, line:{color:"#38bdf8"}, hovertemplate: '%{y:,.0f}€<extra></extra>', ...extra });
+    t.push({ x:MONTHS.map(m=>m.slice(3)), y:v1, name:fYear.value, type, marker:{color: colorB}, line:{color: colorB}, hovertemplate: '%{y:,.0f}€<extra></extra>', ...extra });
     if(v2) {
-      t.push({ x:MONTHS.map(m=>m.slice(3)), y:v2, name:fYear2.value, type, marker:{color:"#f59e0b"}, line:{color:"#f59e0b"}, hovertemplate: '%{y:,.0f}€<extra></extra>', ...extra });
+      t.push({ x:MONTHS.map(m=>m.slice(3)), y:v2, name:fYear2.value, type, marker:{color: colorC}, line:{color: colorC}, hovertemplate: '%{y:,.0f}€<extra></extra>', ...extra });
     }
     return t;
   };
 
-  // Solo renderizamos el de Área Acumulada
   Plotly.newPlot("chartArea",  traces("scatter", {fill:"tozeroy"}), layout);
 
-  // Renderizado de Mini Gráficos
   const sitesList = [...new Set(rawData.map(d => d.Site))].sort();
   const grid = document.getElementById("sitesGrid");
   grid.innerHTML = "";
@@ -583,8 +578,8 @@ function render(){
     grid.appendChild(container);
 
     Plotly.newPlot(`site-chart-${index}`, [
-        { x: MONTHS.map(m=>m.slice(3,5)), y: monthlyS1, type: 'bar', name: y1, marker: {color: '#38bdf8'} },
-        ...(v2 ? [{ x: MONTHS.map(m=>m.slice(3,5)), y: monthlyS2, type: 'bar', name: y2, marker: {color: '#f59e0b'} }] : [])
+        { x: MONTHS.map(m=>m.slice(3,5)), y: monthlyS1, type: 'bar', name: y1, marker: {color: colorB} },
+        ...(v2 ? [{ x: MONTHS.map(m=>m.slice(3,5)), y: monthlyS2, type: 'bar', name: y2, marker: {color: colorC} }] : [])
     ], {
         ...layout,
         showlegend: false,

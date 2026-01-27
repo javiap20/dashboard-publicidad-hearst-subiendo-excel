@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DIGITAL - Evolución Facturación</title>
+<title>DIGITAL - Evolución de los Ingresos</title>
 
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -13,8 +12,10 @@
 :root{
   --card:#111827;
   --text:#e5e7eb;
-  --base:#38bdf8;
-  --comp:#f59e0b;
+  /* CAMBIO DE COLORES AQUÍ */
+  --base:#38bdf8;      
+  --comp:#f59e0b;      
+  
   --neg:#f87171;
   --diffColor:#6ee7b7;
   --ok-green: #34d399;
@@ -25,15 +26,15 @@
   --areaBg:#fcd5ce; 
   --familiaBg:#e9d5ff;
   --print-color: #db2777;
-  --base-color: #38bdf8;
+  --base-color: var(--base); /* Vinculado al nuevo color base */
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', Arial, sans-serif; /* Usa la misma en ambos */
+  font-family: 'Inter', Arial, sans-serif;
   background: linear-gradient(180deg,#020617,#0f172a);
   color: var(--text);
-  overflow-y: scroll; /* Esto evita que el menú se mueva a la izquierda/derecha */
+  overflow-y: scroll;
 }
 
 .nav-menu {
@@ -44,7 +45,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  height: 55px; /* Altura fija para bloquear cualquier movimiento */
+  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,7 +56,7 @@ body {
   margin: 0 10px;
   text-decoration: none;
   font-size: .9em;
-  opacity: 0.8; /* Misma opacidad en ambos */
+  opacity: 0.8;
 }
 .nav-menu .active { opacity: 1; font-weight: bold; border-bottom: 2px solid var(--base-color); padding-bottom: 5px; }
 
@@ -82,9 +83,12 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
 
 .statsBlock{ display:flex; justify-content:center; border-radius:12px; margin:20px 0; gap:10px; flex-wrap:wrap; }
 .subBlock{ border-radius:12px; padding:20px; display:flex; align-items:center; justify-content:center; }
-.statsBase{ flex:0 0 400px; background:var(--comp); color: #111; }
+
+/* Los colores de estos bloques ahora se alimentan de las variables del root */
+.statsBase{ flex:0 0 400px; background:var(--base); color: #111; }
 .statsDiff{ flex:0 0 350px; background:var(--diffColor); color: #111; }
-.statsComp{ flex:0 0 400px; background:var(--base); color: #111; }
+.statsComp{ flex:0 0 400px; background:var(--comp); color: #111; }
+
 .statsValues{ display:flex; justify-content:center; font-size:14px; gap:20px; flex-wrap:wrap; }
 .statsValues div{text-align:center;}
 .statsValues .value{ font-size:18px; font-weight:700; display: block; margin-top: 5px;}
@@ -141,7 +145,7 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
     <a href="index.html" style="margin-left: 20px; border-left: 1px solid #4b5563; padding-left: 20px;">🏠 Home</a>
 </nav>
 
-<h1>DIGITAL - Evolución Facturación</h1>
+<h1>DIGITAL - Evolución de los Ingresos</h1>
 
 <div class="container">
   <div class="card">
@@ -153,12 +157,12 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
 <div id="filters" class="card filters" style="display:none">
     <div class="filtersRow">
       <div>
-        <label style="color:var(--comp)">Año base</label>
+        <label style="color:var(--base)">Año base</label>
         <select id="fYear"></select>
         <div class="checkboxGroup" id="monthsBase"></div>
       </div>
       <div>
-        <label style="color:var(--base)">Año comparación</label>
+        <label style="color:var(--comp)">Año comparación</label>
         <select id="fYear2"></select>
         <div class="checkboxGroup" id="monthsComp"></div>
       </div>
@@ -175,8 +179,6 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
       <div><label>Área</label><select id="fArea"></select></div>
     </div>
   </div>
-
-  
 
   <div id="statsBlock" class="card" style="display:none; background:none; border:none; padding:0;">
     <div class="statsBlock">
@@ -213,14 +215,7 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
 </div>
 
 <script>
-/* =========================
-   AUTO-CARGA DEL EXCEL
-   ========================= */
-// Opción A (misma carpeta del HTML):
 const excelUrl = "PRODUCCION%20DIGITAL.xlsx";
-
-// Opción B (GitHub Raw): descomenta y sustituye por tu URL cruda:
-// const excelUrl = "https://raw.githubusercontent.com/USUARIO/REPO/BRANCH/ruta/PRODUCCION%20DIGITAL.xlsx";
 
 window.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("loadStatus");
@@ -233,29 +228,21 @@ window.addEventListener("DOMContentLoaded", () => {
     })
     .then(buf => {
       const workbook = XLSX.read(buf, { type: "array" });
-      const firstSheet = workbook.SheetNames[0];
-      const data = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
+      const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
       init(data);
       if (statusEl) {
         statusEl.innerText = "✅ Archivo cargado automáticamente";
         statusEl.style.color = "var(--ok-green)";
       }
-      // Si quisieras desactivar el input manual al cargar bien:
-      // const fi = document.getElementById("fileInput"); if (fi) fi.disabled = true;
     })
     .catch(err => {
-      console.error("Auto-carga fallida:", err);
       if (statusEl) {
         statusEl.innerText = "⚠️ No se pudo cargar automáticamente. Selecciona el Excel manualmente.";
         statusEl.style.color = "var(--neg)";
       }
-      // Fallback: el input manual sigue disponible
     });
 });
 
-/* =========================
-   TU CÓDIGO ORIGINAL (intacto)
-   ========================= */
 const MONTHS=["01 Enero","02 Febrero","03 Marzo","04 Abril","05 Mayo","06 Junio","07 Julio","08 Agosto","09 Septiembre","10 Octubre","11 Noviembre","12 Diciembre"];
 let rawData=[];
 
@@ -295,7 +282,7 @@ function init(data){
     Año: String(d["Año inserción"] || "").trim(),
     Mes: MONTHS.find(m => m.startsWith(String(d["Mes inserción"]).trim().substring(0,2))) || "",
     Site: String(d["Publicación"] || "").trim().toLowerCase(),
-    Anunciante: String(d["Anunciante"] || "SIN ANUNCIANTE").trim().toUpperCase(), // Añadido para el neteo
+    Anunciante: String(d["Anunciante"] || "SIN ANUNCIANTE").trim().toUpperCase(),
     Family: toTitleCase(String(d["Familia"] || "").trim()),
     Product: toTitleCase(String(d["Producto"] || "").trim()),
     Sector: cleanSector(String(d["Sector"] || "")),
@@ -331,37 +318,20 @@ function init(data){
   render();
 }
 
-// LÓGICA DE NETEO POR ANUNCIANTE (LA MÁS REAL)
 function calcNetting(data) {
     const totalFact = data.reduce((acc, b) => acc + b.ingreso, 0);
     const groups = {};
-    
-    // Primero agrupamos los importes por Anunciante
-    data.forEach(d => { 
-        if (!groups[d.Anunciante]) groups[d.Anunciante] = []; 
-        groups[d.Anunciante].push(d.ingreso); 
-    });
-
+    data.forEach(d => { if (!groups[d.Anunciante]) groups[d.Anunciante] = []; groups[d.Anunciante].push(d.ingreso); });
     let lines = 0;
-    
-    // Ejecutamos el neteo dentro de cada bolsa de Anunciante
     Object.values(groups).forEach(pool => {
-        // Quitamos los 0s y ordenamos por valor absoluto
         let filteredPool = pool.filter(v => v !== 0).sort((a, b) => Math.abs(a) - Math.abs(b));
-        
         while (filteredPool.length > 0) {
             let cur = filteredPool.shift();
             let idx = filteredPool.findIndex(v => v === -cur);
-            if (idx !== -1) {
-                // Si encontramos la pareja exacta de signo opuesto, eliminamos ambos (anulación)
-                filteredPool.splice(idx, 1);
-            } else if (cur > 0) {
-                // Si es positivo y no tiene pareja negativa, es una línea real
-                lines++;
-            }
+            if (idx !== -1) filteredPool.splice(idx, 1);
+            else if (cur > 0) lines++;
         }
     });
-
     return { total: totalFact, lines, avg: lines ? totalFact / lines : 0 };
 }
 
@@ -379,31 +349,8 @@ function render(){
   const m1 = Array.from(document.getElementById("monthsBase").querySelectorAll("input:checked")).map(c => c.value);
   const m2 = Array.from(document.getElementById("monthsComp").querySelectorAll("input:checked")).map(c => c.value);
 
-  let contextParts = [];
-  if(familyF !== "Todos") contextParts.push(`Familia: ${familyF}`);
-  if(prodF !== "Todos") contextParts.push(`Producto: ${prodF}`);
-  if(sectF !== "Todos") contextParts.push(`Sector: ${sectF}`);
-  if(comF !== "Todos") contextParts.push(`Comercial: ${comF}`);
-  if(areaF !== "Todos") contextParts.push(`Área: ${areaF}`);
-  let extraContext = contextParts.length > 0 ? ` <span class="title-filter-tag">[${contextParts.join(" | ")}]</span>` : "";
-
-  const siteText = (siteF === "Todos") ? "(todos los Sites)" : `(${siteF})`;
-  document.getElementById("mainChartTitle").innerHTML = `Evolución Mensual Acumulada ${siteText}${extraContext}`;
-  document.getElementById("miniChartsTitle").innerHTML = `Evolución Mensual Acumulada por Site${extraContext}`;
-
-  const applyFilters = (data, year, months, siteOverride = null) => data.filter(d => 
-    (year === "Todos" || d.Año === year) &&
-    (siteOverride ? d.Site === siteOverride : (siteF === "Todos" || d.Site === siteF.toLowerCase())) &&
-    (familyF === "Todos" || d.Family === familyF) &&
-    (prodF === "Todos" || d.Product === prodF) &&
-    (sectF === "Todos" || d.Sector === sectF) &&
-    (comF === "Todos" || d.Comercial === comF) &&
-    (areaF === "Todos" || d.Area === areaF) &&
-    (months.length === 0 || months.includes(d.Mes))
-  );
-
-  const dBase = applyFilters(rawData, y1, m1);
-  const dComp = y2 !== "Sin comparar" ? applyFilters(rawData, y2, m2) : [];
+  const dBase = rawData.filter(d => (y1 === "Todos" || d.Año === y1) && (siteF === "Todos" || d.Site === siteF.toLowerCase()) && (familyF === "Todos" || d.Family === familyF) && (prodF === "Todos" || d.Product === prodF) && (sectF === "Todos" || d.Sector === sectF) && (comF === "Todos" || d.Comercial === comF) && (areaF === "Todos" || d.Area === areaF) && (m1.length === 0 || m1.includes(d.Mes)));
+  const dComp = y2 !== "Sin comparar" ? rawData.filter(d => d.Año === y2 && (siteF === "Todos" || d.Site === siteF.toLowerCase()) && (familyF === "Todos" || d.Family === familyF) && (prodF === "Todos" || d.Product === prodF) && (sectF === "Todos" || d.Sector === sectF) && (comF === "Todos" || d.Comercial === comF) && (areaF === "Todos" || d.Area === areaF) && (m2.length === 0 || m2.includes(d.Mes))) : [];
 
   const res1 = calcNetting(dBase);
   const res2 = calcNetting(dComp);
@@ -416,20 +363,18 @@ function render(){
     totalStatsComp.textContent = formatCurrency(res2.total);
     linesStatsComp.textContent = formatThousand(res2.lines);
     avgStatsComp.textContent = formatCurrency(res2.avg);
-    
     const diffAvg = res2.avg ? Math.round(((res1.avg/res2.avg)-1)*100) : 0;
     const diffTotal = res2.total ? Math.round(((res1.total/res2.total)-1)*100) : 0;
-    
     diffAvgStats.textContent = (diffAvg > 0 ? "+" : "") + diffAvg + "%";
     diffAvgStats.className = "value" + (diffAvg < 0 ? " negative" : "");
-    
     diffTotalStats.textContent = (diffTotal > 0 ? "+" : "") + diffTotal + "%";
     diffTotalStats.className = "value" + (diffTotal < 0 ? " negative" : "");
-  } else {
-    totalStatsComp.textContent = "-"; linesStatsComp.textContent = "0"; avgStatsComp.textContent = "-";
-    diffAvgStats.textContent = "0%"; diffAvgStats.className = "value";
-    diffTotalStats.textContent = "0%"; diffTotalStats.className = "value";
   }
+
+  // TRUCO PROFESIONAL: Lectura dinámica de colores desde el CSS
+  const style = getComputedStyle(document.documentElement);
+  const colorBase = style.getPropertyValue('--base').trim();
+  const colorComp = style.getPropertyValue('--comp').trim();
 
   const layoutBase = { 
     paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", 
@@ -438,8 +383,8 @@ function render(){
   };
 
   Plotly.newPlot("chartArea", [
-    { x: MONTHS.map(m=>m.slice(3)), y: monthlySeries(dBase), type: 'scatter', fill: 'tozeroy', name: y1, line: {color: '#38bdf8'} },
-    ...(y2 !== "Sin comparar" ? [{ x: MONTHS.map(m=>m.slice(3)), y: monthlySeries(dComp), type: 'scatter', fill: 'tozeroy', name: y2, line: {color: '#f59e0b'} }] : [])
+    { x: MONTHS.map(m=>m.slice(3)), y: monthlySeries(dBase), type: 'scatter', fill: 'tozeroy', name: y1, line: {color: colorBase} },
+    ...(y2 !== "Sin comparar" ? [{ x: MONTHS.map(m=>m.slice(3)), y: monthlySeries(dComp), type: 'scatter', fill: 'tozeroy', name: y2, line: {color: colorComp} }] : [])
   ], layoutBase);
 
   const sitesList = [...new Set(rawData.map(d => d.Site))].filter(s => s !== "www.micasarevista.com").sort();
@@ -447,22 +392,16 @@ function render(){
   grid.innerHTML = "";
 
   sitesList.forEach((siteName, index) => {
-    const siteData1 = applyFilters(rawData, y1, m1, siteName);
-    const siteData2 = y2 !== "Sin comparar" ? applyFilters(rawData, y2, m2, siteName) : [];
+    const sD1 = dBase.filter(d => d.Site === siteName);
+    const sD2 = dComp.filter(d => d.Site === siteName);
     const container = document.createElement("div");
     container.className = "mini-chart-card";
     container.innerHTML = `<h3>${siteName.toLowerCase()}</h3><div id="site-chart-${index}" class="mini-chart"></div>`;
     grid.appendChild(container);
     Plotly.newPlot(`site-chart-${index}`, [
-        { x: MONTHS.map(m=>m.slice(3,5)), y: monthlySeries(siteData1), type: 'bar', name: y1, marker: {color: '#38bdf8'} },
-        ...(y2 !== "Sin comparar" ? [{ x: MONTHS.map(m=>m.slice(3,5)), y: monthlySeries(siteData2), type: 'bar', name: y2, marker: {color: '#f59e0b'} }] : [])
-    ], {
-        ...layoutBase,
-        showlegend: false,
-        margin: { t:10, l:35, r:10, b:25 },
-        yaxis: { gridcolor: "#2d3748", tickfont: {size: 9}, ticksuffix: "€" },
-        xaxis: { tickfont: {size: 9} }
-    }, {displayModeBar: false});
+        { x: MONTHS.map(m=>m.slice(3,5)), y: monthlySeries(sD1), type: 'bar', name: y1, marker: {color: colorBase} },
+        ...(y2 !== "Sin comparar" ? [{ x: MONTHS.map(m=>m.slice(3,5)), y: monthlySeries(sD2), type: 'bar', name: y2, marker: {color: colorComp} }] : [])
+    ], { ...layoutBase, showlegend: false, margin: { t:10, l:35, r:10, b:25 }, yaxis: { gridcolor: "#2d3748", tickfont: {size: 9}, ticksuffix: "€" }, xaxis: { tickfont: {size: 9} } }, {displayModeBar: false});
   });
 }
 </script>

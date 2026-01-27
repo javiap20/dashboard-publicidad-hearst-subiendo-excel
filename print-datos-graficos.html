@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,8 +16,6 @@
   --accent:#38bdf8;
   --accent2:#f59e0b;
   --down:#f87171;
-  --base-color:#38bdf8; 
-  --comp-color:#38bdf8; 
   --ok-green: #34d399;
   --comercial-color:#a78bfa;
   --comercial-bg-light:#efe9ff;
@@ -26,14 +23,18 @@
   --comercial-text:#111;
   --print-color: #db2777;
   --bc-color: #38bdf8;
+
+  /* VARIABLES DE CONTROL DE COLOR POR AÑO */
+  --year-base-color: #38bdf8;  /* Azul Digital */
+  --year-comp-color: #f59e0b;  /* Amarillo/Naranja */
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', Arial, sans-serif; /* Usa la misma en ambos */
+  font-family: 'Inter', Arial, sans-serif;
   background: linear-gradient(180deg,#020617,#0f172a);
   color: var(--text);
-  overflow-y: scroll; /* Esto evita que el menú se mueva a la izquierda/derecha */
+  overflow-y: scroll;
 }
 
 .nav-menu {
@@ -44,7 +45,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  height: 55px; /* Altura fija para bloquear cualquier movimiento */
+  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,12 +56,11 @@ body {
   margin: 0 10px;
   text-decoration: none;
   font-size: .9em;
-  opacity: 0.8; /* Misma opacidad en ambos */
+  opacity: 0.8;
 }
 .nav-menu a:hover { opacity: 1; color: var(--bc-color); }
 .nav-menu .active { font-weight: bold; border-bottom: 2px solid var(--bc-color); opacity: 1; padding-bottom: 5px; }
 
-/* TÍTULO AJUSTADO */
 h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
 
 .container{ max-width:1500px; margin:auto; padding:20px; }
@@ -117,8 +117,8 @@ h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
   margin-bottom: 10px;
 }
 
-.label-base { color: var(--base-color); font-weight: 700; }
-.label-comp { color: var(--comp-color); font-weight: 700; }
+.label-base { color: var(--year-base-color); font-weight: 700; }
+.label-comp { color: var(--year-comp-color); font-weight: 700; }
 
 .months-container{ display:flex; flex-wrap:wrap; gap:10px; margin-top:5px; }
 .months-container label{ display:flex; align-items:center; gap:5px; cursor:pointer; font-size: 0.9em; font-weight: normal; }
@@ -145,7 +145,7 @@ h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
 <body>
 
 <nav class="nav-menu">
-    <span style="color: var(--base-color); font-weight: bold; margin-right: 10px; opacity: 1;">DIGITAL:</span>
+    <span style="color: #38bdf8; font-weight: bold; margin-right: 10px; opacity: 1;">DIGITAL:</span>
     <a href="digital-datos-graficos.html">Datos</a>
     <a href="digital-facturacion-desglosada.html">Desglose</a>
     <a href="digital-facturacion-por-anunciante.html">Anunciantes</a>
@@ -216,13 +216,8 @@ h1{ text-align:center; margin:20px 0; font-size: 1.5em; }
   </div>
 </div>
 
-<!-- ======= BLOQUE AÑADIDO: Auto-carga del Excel (PRODUCCION PRINT.xlsx) ======= -->
 <script>
-// Opción A: Excel en la misma carpeta que este HTML
 const excelUrl = "PRODUCCION%20PRINT.xlsx";
-
-// Opción B: Excel en GitHub Raw (descomenta y pega tu URL cruda si lo prefieres)
-// const excelUrl = "https://raw.githubusercontent.com/USUARIO/REPO/BRANCH/ruta/PRODUCCION%20PRINT.xlsx";
 
 window.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("loadStatus");
@@ -237,14 +232,11 @@ window.addEventListener("DOMContentLoaded", () => {
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
-      // Reutilizamos tu flujo original:
       init(json);
       if (statusEl) {
         statusEl.innerText = "✅ Archivo cargado automáticamente";
         statusEl.style.color = "var(--ok-green)";
       }
-      // (Opcional) Desactivar input manual:
-      // const fi = document.getElementById("fileInput"); if (fi) fi.disabled = true;
     })
     .catch(err => {
       console.error("Auto-carga fallida:", err);
@@ -255,7 +247,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-<!-- ======= FIN BLOQUE AÑADIDO ======= -->
 
 <script>
 let rawData=[];
@@ -287,9 +278,20 @@ fileInput.onchange = e => {
   else r.readAsArrayBuffer(f);
 };
 
+// FUNCIÓN CORREGIDA PARA LIMPIAR NÚMEROS DE EXCEL
 function normalizeMonth(m){
   if(!m) return "";
-  const parts=m.trim().split(" ");
+  let val = String(m).trim();
+  
+  // Si Excel envió un número de serie (ej: 46242)
+  if(!isNaN(val) && val.length > 4) {
+    const date = new Date((val - 25569) * 86400 * 1000);
+    const monthName = date.toLocaleString('es-ES', { month: 'long' });
+    return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  }
+
+  // Lógica original para textos con espacios
+  const parts=val.split(" ");
   return parts[parts.length-1];
 }
 
@@ -311,7 +313,7 @@ function init(data){
   rawData = data.map(d => ({
     ingreso:    num(d["Imp.Neto a Comisionar"]),
     Año:        String(d["Año inserción"] || "").trim().toUpperCase(),
-    Mes:        normalizeMonth(String(d["Mes inserción"] || "")),
+    Mes:        normalizeMonth(d["Mes inserción"]),
     Site:       String(d["Publicación"] || "Sin site").trim().toUpperCase(),
     Familia:    String(d["Familia"] || "Sin familia").trim().toUpperCase(),
     Area:       String(d["ÁREA"] || "Sin área").trim().toUpperCase(),
@@ -398,18 +400,22 @@ function drawChart(id,key,d1,d2,l1,l2){
 
   const traces=[];
   
+  const style = getComputedStyle(document.documentElement);
+  const colorBase = style.getPropertyValue('--year-base-color').trim();
+  const colorComp = style.getPropertyValue('--year-comp-color').trim();
+
   if(d2.length) {
     traces.push({
       y:labs.map(l => key === 'Comercial' || key === 'Site' ? formatLabel(l) : l), 
       x:labs.map(l=>s2[l]||0), 
-      name:l2, type:"bar", orientation:'h', marker:{color:"#f59e0b"}
+      name:l2, type:"bar", orientation:'h', marker:{color: colorComp}
     });
   }
 
   traces.push({
     y:labs.map(l => key === 'Comercial' || key === 'Site' ? formatLabel(l) : l), 
     x:labs.map(l=>s1[l]||0), 
-    name:l1, type:"bar", orientation:'h', marker:{color:"#38bdf8"},
+    name:l1, type:"bar", orientation:'h', marker:{color: colorBase},
     text: textBars, textposition: 'outside', cliponaxis: false
   });
   

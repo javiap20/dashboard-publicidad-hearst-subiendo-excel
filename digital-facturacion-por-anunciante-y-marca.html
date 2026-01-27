@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -27,15 +26,19 @@
   --base-color: #38bdf8;
   --summary-bg:#111827;
   --summary-border:#4b5563;
-  --new-title-color: #a8ff53; /* NUEVO COLOR ÚNICO */
+  --new-title-color: #a8ff53;
+  
+  /* VARIABLES DE CONTROL DE AÑOS - Cámbialas aquí y cambiarán en todo el documento */
+  --year-base-color: var(--base);  /* Actualmente Azul Digital */
+  --year-comp-color: var(--comp);  /* Actualmente Amarillo/Naranja */
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', Arial, sans-serif; /* Usa la misma en ambos */
+  font-family: 'Inter', Arial, sans-serif;
   background: linear-gradient(180deg,#020617,#0f172a);
   color: var(--text);
-  overflow-y: scroll; /* Esto evita que el menú se mueva a la izquierda/derecha */
+  overflow-y: scroll;
 }
 
 .nav-menu {
@@ -46,7 +49,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  height: 55px; /* Altura fija para bloquear cualquier movimiento */
+  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,7 +60,7 @@ body {
   margin: 0 10px;
   text-decoration: none;
   font-size: .9em;
-  opacity: 0.8; /* Misma opacidad en ambos */
+  opacity: 0.8;
 }
 .nav-menu .active { opacity: 1; font-weight: bold; border-bottom: 2px solid var(--base-color); padding-bottom: 5px; }
 
@@ -100,7 +103,6 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
 
 .summaryCard{ border:1px dashed var(--summary-border); background:var(--summary-bg); border-radius:12px; padding:18px; }
 
-/* ESTILO DEL TÍTULO SOLICITADO */
 .summaryMainTitle { 
     text-align: center; 
     font-size: 1.3rem; 
@@ -119,8 +121,11 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
 .mirror-col { background:rgba(2,6,23,0.35); border:1px solid rgba(75,85,99,0.3); border-radius:12px; padding:15px; text-align: center; }
 
 .brand-title-box { border-bottom: 1px solid #374151; padding-bottom: 8px; margin-bottom: 12px; }
-.brand-title { color: var(--comp); font-weight: 800; font-size: 1.1em; display: block; margin-bottom: 4px; }
-.brand-title.right { color: var(--base); }
+
+/* Aplicamos las variables centralizadas a los títulos de marca */
+.brand-title { color: var(--year-base-color); font-weight: 800; font-size: 1.1em; display: block; margin-bottom: 4px; }
+.brand-title.right { color: var(--year-comp-color); }
+
 .brand-total-val { font-size: 1.15em; font-weight: bold; color: #fff; }
 
 .product-list { list-style: none; padding: 0; margin: 0; }
@@ -165,28 +170,25 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
   </div>
 
 <div class="card filters">
-        <div class="filtersRow">
-          <div>
-            <label style="color:var(--comp);">Año base</label>
-            <select id="fYear"></select>
-            <div class="checkboxGroup" id="monthsBase"></div>
-          </div>
-          <div>
-            <label style="color:var(--base);">Año comparación</label>
-            <select id="fYear2"></select>
-            <div class="checkboxGroup" id="monthsComp"></div>
-          </div>
-        </div>
+    <div class="filtersRow">
+      <div>
+        <label style="color:var(--year-base-color); font-weight: bold;">Año base</label>
+        <select id="fYear"></select>
+        <div class="checkboxGroup" id="monthsBase"></div>
       </div>
+      <div>
+        <label style="color:var(--year-comp-color); font-weight: bold;">Año comparación</label>
+        <select id="fYear2"></select>
+        <div class="checkboxGroup" id="monthsComp"></div>
+      </div>
+    </div>
+  </div>
 
   <div id="mainUI" style="display:none">
       <div class="advertiser-row">
           <label class="label-style" style="color:var(--anuncianteBg);">Seleccionar Anunciante Principal</label>
           <select id="fAnunciante"></select>
       </div>
-
-
-
 
       <div class="card filters">
         <div class="filtersRow">
@@ -197,8 +199,6 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
           <div><label>Área</label><select id="fArea"></select></div>
         </div>
       </div>
-
-      
 
       <div class="totalBlock card">
         <div class="totalValues">
@@ -212,13 +212,8 @@ h1 { text-align: center; font-size: 1.5rem; margin: 20px 0; }
   </div>
 </div>
 
-<!-- ======= BLOQUE AÑADIDO: Auto-carga del Excel (PRODUCCION DIGITAL.xlsx) ======= -->
 <script>
-// Opción A: Excel en la misma carpeta que este HTML
 const excelUrl = "PRODUCCION%20DIGITAL.xlsx";
-
-// Opción B: Excel en GitHub Raw (descomenta y pega tu URL cruda si lo prefieres)
-// const excelUrl = "https://raw.githubusercontent.com/USUARIO/REPO/BRANCH/ruta/PRODUCCION%20DIGITAL.xlsx";
 
 window.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("loadStatus");
@@ -232,14 +227,11 @@ window.addEventListener("DOMContentLoaded", () => {
     .then(buf => {
       const wb = XLSX.read(buf, { type: "array" });
       const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
-      // Reutilizamos tu flujo original:
       init(json);
       if (statusEl) {
         statusEl.innerText = "✅ Archivo cargado automáticamente";
         statusEl.style.color = "var(--ok-green)";
       }
-      // (Opcional) Desactivar input manual si quieres:
-      // const fi = document.getElementById("fileInput"); if (fi) fi.disabled = true;
     })
     .catch(err => {
       console.error("Auto-carga fallida:", err);
@@ -250,7 +242,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-<!-- ======= FIN BLOQUE AÑADIDO ======= -->
 
 <script>
 const MONTHS = ["01 Enero","02 Febrero","03 Marzo","04 Abril","05 Mayo","06 Junio","07 Julio","08 Agosto","09 Septiembre","10 Octubre","11 Noviembre","12 Diciembre"];
@@ -272,7 +263,6 @@ function num(v){
   return Number(String(v).replace(/\u00A0/g," ").replace(/€/g,"").replace(/\s/g,"").replace(/\./g,"").replace(/,/g,".")) || 0;
 }
 
-// FORMATO DE MILLARES CORREGIDO CON PUNTO
 const formatCurrency = n => {
     return new Intl.NumberFormat('es-ES', { 
         style: 'decimal', 
@@ -384,7 +374,6 @@ function render() {
   if(y2!=="Sin comparar" && t2 > 0) totalVariation.innerHTML = getVarHtml(t1, t2);
   else totalVariation.textContent = "—";
 
-  // TÍTULO CON COLOR VERDE NEÓN
   let html = `<div class="summaryMainTitle">Desglose publicitario (productos) de las diferentes Marcas</div>`;
   html += `<div class="summaryHeaderRow"><div class="summaryHeader">Año Base: ${y1}</div><div class="summaryHeader">Año Comparación: ${y2}</div></div>`;
 
