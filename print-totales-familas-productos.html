@@ -173,13 +173,14 @@ h1 {
     <a href="digital-facturacion-desglosada.html">Desglose</a>
     <a href="digital-facturacion-por-anunciante.html">Anunciantes</a>
     <a href="digital-facturacion-por-anunciante-y-marca.html">Marcas</a>
-    <a href="digital-totales-familas-productos.html" class="active">Productos</a>
+    <a href="digital-totales-familas-productos.html">Productos</a>
 
     <span style="color: var(--print-color); font-weight: bold; margin-left: 20px; margin-right: 10px; border-left: 1px solid #4b5563; padding-left: 20px; opacity: 1;">PRINT:</span>
     <a href="print-datos-graficos.html">Datos</a>
     <a href="print-facturacion-desglosada.html">Desglose</a>
     <a href="print-facturacion-por-anunciante.html">Anunciantes</a>
     <a href="print-facturacion-por-anunciante-y-marca.html">Marcas</a>
+    <a href="print-totales-familas-productos.html" class="active">Productos</a>
     
     <a href="index.html" style="margin-left: 20px; border-left: 1px solid #4b5563; padding-left: 20px;">🏠 Home</a>
 </nav>
@@ -204,7 +205,7 @@ h1 {
   <div id="inlineFiltersCard" class="card filters" style="display:none">
     <div class="inline-filters">
       <div class="inline-filter comercial"><span class="label">Comercial</span><select id="fComercial"></select></div>
-      <div class="inline-filter site"><span class="label">Site</span><select id="fSite"></select></div>
+      <div class="inline-filter site"><span class="label">Revista</span><select id="fSite"></select></div>
       <div class="inline-filter area"><span class="label">Área</span><select id="fArea"></select></div>
     </div>
   </div>
@@ -300,8 +301,8 @@ function init(data){
     ingreso:    num(d["Imp.Neto a Comisionar"]),
     Año:        String(d["Año inserción"] || "").trim(),
     Mes:        String(d["Mes inserción"] || "").trim(),
-    Site:       String(d["Publicación"] || "SIN SITE").trim().toUpperCase(),
-    Area:       String(d["ÁREAS"] || "SIN ÁREA").trim().toUpperCase(),
+    Site:       String(d["Publicación"] || "SIN REVISTA").trim().toUpperCase(),
+    Area:       String(d["ÁREA"] || "SIN ÁREA").trim().toUpperCase(),
     Familia:    String(d["Familia"] || "SIN FAMILIA").trim().toUpperCase(),
     Comercial:  String(d["Comercial"] || "SIN COMERCIAL").trim().toUpperCase(),
     Producto:   String(d["Producto"] || "").trim().toUpperCase(),
@@ -322,8 +323,8 @@ function init(data){
   };
 
   populate("fComercial", "Comercial", "capitalize");
-  populate("fSite", "Site", "site");
-  populate("fArea", "Area", "capitalize");
+  populate("fSite", "Site", "revista");
+  populate("fArea", "Area", "area");
 
   createMonthCheckboxes("monthContainer1", months);
   createMonthCheckboxes("monthContainer2", months);
@@ -404,22 +405,39 @@ function render(){
   kpi(kpisTotals,`Total ${y1}`,resT1.total,pctT,"--totales-color");
   if(y2!=="Sin comparar") kpi(kpisTotals,`Total ${y2}`,resT2.total,"","--totales-color");
 
-  const blocks=[
-    {name:"SPONSORSHIP", type:"Familia", color:"--bc-color"},
-    {name:"BRANDED CONTENT", type:"Producto", color:"--bc-color"},
-    {name:"BRANDED CONTENT VIDEO", displayName: "Branded Content Vídeo", type:"Producto", color:"--bc-color"},
-    {name:"BRANDED CONTENT SINDICATED", displayName: "Branded Content Sindicado", type:"Producto", color:"--bc-color"},
-    {name:"CURATED", type:"Producto", color:"--curated-color"},
-    {name:"SOCIAL NETWORKS", type:"Familia", color:"--social-color"},
-    {name:["INSTAGRAM (SPONSORED POST)", "TIK TOK (SPONSORED POST)"], displayName: "Social Paid", type:"Producto", color:"--social-color"},
-    {name:["INSTAGRAM (ORGÁNICO)", "INSIDER", "REDES SOCIALES ORGANICAS"], displayName: "Social Organic", type:"Producto", color:"--social-color"},
-    {name:"DISPLAY", type:"Familia", color:"--display-color"},
-    {name:"PROGRAMATICA DISPLAY DIRECTO", type:"Familia", color:"--program-directo"},
-    {name:"PROGRAMATICA DISPLAY INDIRECTO", type:"Familia", color:"--program-directo"},
-    {name:"VIDEO PROGRAMATICO DIRECTO", type:"Familia", color:"--program-directo"},
-    {name:"VIDEO PROGRAMATICO INDIRECTO", type:"Familia", color:"--program-directo"},
-    {name:"VIDEO", type:"Familia", color:"--video-color"}
+const blocks=[
+    {name:"CONVENCIONAL", displayName: "<br><br>FAMILIA: CONVENCIONAL", type:"Familia", color:"--bc-color"},
+    {name:"PAGINA 1º TERCIO", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PAGINA 1º TERCIO", type:"Producto", color:"--bc-color"},
+    {name:"DOBLE PAGINA 1º TERCIO", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DOBLE PAGINA 1º TERCIO", type:"Producto", color:"--bc-color"},
+    {name:"CONTRAPORTADA", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CONTRAPORTADA", type:"Producto", color:"--bc-color"},
+    {name:"1ª DOBLE PAGINA", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1ª DOBLE PAGINA", type:"Producto", color:"--bc-color"},
+    {name:"PAGINA IMPAR DE 4º A 11ª", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PAGINA IMPAR DE 4º A 11ª", type:"Producto", color:"--bc-color"},
+    {name:"2ª DOLE PAGINA", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2ª DOLE PAGINA", type:"Producto", color:"--bc-color"},
+    {name:"3ª DOBLE PAGINA", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3ª DOBLE PAGINA", type:"Producto", color:"--bc-color"},
+    {name:"1ª PAGINA IMPAR", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1ª PAGINA IMPAR", type:"Producto", color:"--bc-color"},
+    {name:"1 PAGINA", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 PAGINA", type:"Producto", color:"--bc-color"},
+    {name:"3ª PAGINA IMPAR", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3ª PAGINA IMPAR", type:"Producto", color:"--bc-color"},
+    {name:"2ª PAGINA IMPAR", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2ª PAGINA IMPAR", type:"Producto", color:"--bc-color"},
+    {name:"DOBLE PAGINA", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DOBLE PAGINA", type:"Producto", color:"--bc-color"},
+
+
+
+    {name:"CURATED", displayName: "<br><br>CURATED", type:"Familia", color:"--social-color"},
+
+
+
+    {name:"ELEMENTOS ESPECIALES", displayName: "FAMILIA ELEMENTOS ESPECIALES", displayName: "<br><br>FAMILIA: ELEMENTOS ESPECIALES", type:"Familia", color:"--curated-color"},
+    {name:"ENCARTE", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ENCARTE", type:"Producto", color:"--curated-color"},
+    {name:"PRODUCTO EN PORTADA", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PRODUCTO EN PORTADA", type:"Producto", color:"--curated-color"},
+    {name:"SACHETTE", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SACHETTE", type:"Producto", color:"--curated-color"},
+
+
+
+    {name:"SPONSORSHIP", displayName: "FAMILIA SPONSORSHIP", displayName: "<br><br>FAMILIA: SPONSORSHIP", type:"Familia", color:"--display-color"},
+    {name:"DOBLE PAGINA BRANDED", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DOBLE PAGINA BRANDED", type:"Producto", color:"--display-color"},
+    {name:"PAGINA BRANDED", displayName: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PAGINA BRANDED", type:"Producto", color:"--display-color"}
   ];
+
 
   blocks.forEach(b=>{
     const filterF = (d) => {
@@ -431,7 +449,7 @@ function render(){
 
     if (resB1.total === 0 && resB2.total === 0) return;
 
-    const divT=document.createElement("div"); divT.className="section-title"; divT.textContent=b.displayName || b.name; kpisRows.appendChild(divT);
+    const divT=document.createElement("div"); divT.className="section-title"; divT.innerHTML=b.displayName || b.name; kpisRows.appendChild(divT);
     let pS="", pA="";
     if(resB2.total !== 0){ 
       const d=(resB1.total - resB2.total) / Math.abs(resB2.total) * 100; 
