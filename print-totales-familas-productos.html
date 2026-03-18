@@ -215,11 +215,11 @@ h1 {
 </div>
 
 <script>
-const excelUrl = "PRODUCCION%20DIGITAL.xlsx";
+const excelUrl = "PRODUCCION%20PRINT.xlsx";
 
 window.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("loadStatus");
-  if (statusEl) statusEl.innerText = "Cargando archivo PRODUCCION DIGITAL.xlsx…";
+  if (statusEl) statusEl.innerText = "Cargando archivo PRODUCCION PRINT.xlsx…";
 
   fetch(excelUrl)
     .then(resp => {
